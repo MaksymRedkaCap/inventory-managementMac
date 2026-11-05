@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factory Inventory Management - Architecture</title>
+<style>
+  :root {
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --blue: #2563eb;
+    --green: #16a34a;
+    --amber: #ca8a04;
+    --red: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.55;
+  }
+  header { background: var(--ink); color: #fff; padding: 36px 24px; }
+  header .wrap, main { max-width: 1040px; margin: 0 auto; }
+  header h1 { margin: 0 0 6px; font-size: 26px; font-weight: 600; }
+  header p { margin: 0; color: #cbd5e1; }
+  main { padding: 32px 24px 64px; }
+  h2 { font-size: 18px; margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 14px; margin: 0 0 8px; }
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 760px) { .g2, .g3 { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 18px; }
+  .card p, .card li { font-size: 14px; color: #334155; margin: 0; }
+  .card ul { margin: 0; padding-left: 18px; }
+  .tag { display: inline-block; font-size: 12px; color: var(--muted); background: #f1f5f9;
+         border: 1px solid var(--line); border-radius: 4px; padding: 1px 7px; margin: 2px 4px 2px 0; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; background: #f1f5f9;
+         padding: 1px 5px; border-radius: 4px; }
+  table { width: 100%; border-collapse: collapse; background: var(--card);
+          border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #f1f5f9; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  tr:last-child td { border-bottom: none; }
+  svg text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .diagram { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  ol.flow { margin: 0; padding-left: 20px; }
+  ol.flow li { margin-bottom: 8px; font-size: 14px; color: #334155; }
+  .note { border-left: 4px solid var(--amber); background: #fffbeb; padding: 12px 16px;
+          border-radius: 4px; font-size: 14px; color: #422006; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Factory Inventory Management System</h1>
+    <p>Architecture overview: system structure, technology stack and data flow</p>
+  </div>
+</header>
+
+<main>
+
+<h2>Summary</h2>
+<div class="card">
+  <p>A demo full-stack application with a Vue 3 single-page frontend and a FastAPI backend. There is no database:
+  the backend loads JSON files into memory at startup and answers every request by filtering those lists in Python.
+  Four filters (period, warehouse, category, order status) are held in shared client state and sent as query parameters, so every screen reflects the same slice of data.</p>
+</div>
+
+<h2>System architecture</h2>
+<div class="diagram">
+<svg viewBox="0 0 960 330" width="100%" role="img" aria-label="System architecture diagram">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- Browser -->
+  <rect x="10" y="10" width="440" height="310" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="30" y="36" font-size="13" font-weight="600" fill="#0f172a">Frontend  (Vue 3 + Vite, port 3000)</text>
+
+  <rect x="30" y="52" width="400" height="48" rx="6" fill="#fff" stroke="#e2e8f0"/>
+  <text x="44" y="73" font-size="12.5" font-weight="600" fill="#0f172a">Views (vue-router)</text>
+  <text x="44" y="90" font-size="11.5" fill="#64748b">Dashboard, Inventory, Orders, Demand, Spending, Reports</text>
+
+  <rect x="30" y="112" width="400" height="48" rx="6" fill="#fff" stroke="#e2e8f0"/>
+  <text x="44" y="133" font-size="12.5" font-weight="600" fill="#0f172a">Components</text>
+  <text x="44" y="150" font-size="11.5" fill="#64748b">FilterBar, detail modals, ProfileMenu, LanguageSwitcher</text>
+
+  <rect x="30" y="172" width="400" height="48" rx="6" fill="#fff" stroke="#e2e8f0"/>
+  <text x="44" y="193" font-size="12.5" font-weight="600" fill="#0f172a">Composables (shared singleton state)</text>
+  <text x="44" y="210" font-size="11.5" fill="#64748b">useFilters, useI18n (en / ja, USD / JPY), useAuth</text>
+
+  <rect x="30" y="232" width="400" height="70" rx="6" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="44" y="253" font-size="12.5" font-weight="600" fill="#1e3a8a">API client: src/api.js</text>
+  <text x="44" y="270" font-size="11.5" fill="#1e40af">axios, base URL http://localhost:8001/api</text>
+  <text x="44" y="286" font-size="11.5" fill="#1e40af">drops any filter whose value is "all"</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="267" x2="520" y2="267" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)"/>
+  <text x="456" y="258" font-size="11" fill="#64748b">HTTP / JSON</text>
+
+  <!-- Backend -->
+  <rect x="520" y="10" width="430" height="310" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="540" y="36" font-size="13" font-weight="600" fill="#0f172a">Backend  (FastAPI + Uvicorn, port 8001)</text>
+
+  <rect x="540" y="52" width="390" height="48" rx="6" fill="#fff" stroke="#e2e8f0"/>
+  <text x="554" y="73" font-size="12.5" font-weight="600" fill="#0f172a">server/main.py: routes + CORS</text>
+  <text x="554" y="90" font-size="11.5" fill="#64748b">/api/inventory, orders, demand, backlog, dashboard, spending, reports</text>
+
+  <rect x="540" y="112" width="390" height="48" rx="6" fill="#fff" stroke="#e2e8f0"/>
+  <text x="554" y="133" font-size="12.5" font-weight="600" fill="#0f172a">Filter helpers</text>
+  <text x="554" y="150" font-size="11.5" fill="#64748b">apply_filters (warehouse, category, status), filter_by_month</text>
+
+  <rect x="540" y="172" width="390" height="48" rx="6" fill="#fff" stroke="#e2e8f0"/>
+  <text x="554" y="193" font-size="12.5" font-weight="600" fill="#0f172a">Pydantic models</text>
+  <text x="554" y="210" font-size="11.5" fill="#64748b">response_model validation on list and detail endpoints</text>
+
+  <rect x="540" y="232" width="390" height="70" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="554" y="253" font-size="12.5" font-weight="600" fill="#14532d">server/mock_data.py  +  server/data/*.json</text>
+  <text x="554" y="270" font-size="11.5" fill="#166534">loaded once at startup into module-level lists;</text>
+  <text x="554" y="286" font-size="11.5" fill="#166534">no database, no persistence, restart to reload</text>
+</svg>
+</div>
+
+<h2>Technology stack</h2>
+<div class="grid g3">
+  <div class="card">
+    <h3>Frontend</h3>
+    <span class="tag">Vue 3 (Composition API)</span>
+    <span class="tag">Vite 8</span>
+    <span class="tag">vue-router 4</span>
+    <span class="tag">axios</span>
+    <p style="margin-top:8px">Custom SVG charts and CSS Grid layouts. Node 20.19+ or 22.12+.</p>
+  </div>
+  <div class="card">
+    <h3>Backend</h3>
+    <span class="tag">Python 3.11+</span>
+    <span class="tag">FastAPI</span>
+    <span class="tag">Uvicorn</span>
+    <span class="tag">Pydantic 2</span>
+    <p style="margin-top:8px">Dependencies managed with <code>uv</code>. Interactive docs at <code>/docs</code>.</p>
+  </div>
+  <div class="card">
+    <h3>Data and tooling</h3>
+    <span class="tag">JSON files</span>
+    <span class="tag">pytest</span>
+    <span class="tag">FastAPI TestClient</span>
+    <span class="tag">Claude Code config</span>
+    <p style="margin-top:8px">Backend tests live in <code>tests/backend</code>. No frontend tests or linting.</p>
+  </div>
+</div>
+
+<h2>Data flow</h2>
+<div class="grid g2">
+  <div class="card">
+    <h3>Request path</h3>
+    <ol class="flow">
+      <li>The user changes a filter in <code>FilterBar</code> (period, warehouse, category, status).</li>
+      <li><code>useFilters</code> updates module-level refs shared by every view.</li>
+      <li>A view watcher fires and calls <code>api.js</code> with <code>getCurrentFilters()</code>.</li>
+      <li>axios sends a GET with query parameters; values of <code>all</code> are omitted.</li>
+      <li>FastAPI applies <code>apply_filters</code> and <code>filter_by_month</code> to the in-memory lists.</li>
+      <li>Pydantic validates the result and FastAPI returns JSON.</li>
+      <li>The view stores raw data in refs and derives charts and totals in computed properties.</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h3>Startup path</h3>
+    <ol class="flow">
+      <li><code>python main.py</code> starts Uvicorn on port 8001.</li>
+      <li>Importing <code>mock_data.py</code> reads each file in <code>server/data/</code>.</li>
+      <li>Lists are held in memory for the life of the process.</li>
+      <li>Endpoints read the lists directly; nothing is written back.</li>
+      <li><code>generate_data.py</code> can regenerate the JSON files offline.</li>
+    </ol>
+    <h3 style="margin-top:16px">Filter support by endpoint</h3>
+    <p>Quarters (<code>Q1-2025</code> to <code>Q4-2025</code>) and months (<code>2025-01</code>) are matched
+    as substrings of <code>order_date</code>. Inventory has no date, so it ignores the period filter.</p>
+  </div>
+</div>
+
+<h2>API surface</h2>
+<table>
+  <thead><tr><th>Endpoint</th><th>Filters</th><th>Source data</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET /api/inventory</code>, <code>/{id}</code></td><td>warehouse, category</td><td>inventory.json</td></tr>
+    <tr><td><code>GET /api/orders</code>, <code>/{id}</code></td><td>warehouse, category, status, month</td><td>orders.json</td></tr>
+    <tr><td><code>GET /api/dashboard/summary</code></td><td>warehouse, category, status, month</td><td>inventory + orders (aggregated)</td></tr>
+    <tr><td><code>GET /api/demand</code></td><td>none</td><td>demand_forecasts.json</td></tr>
+    <tr><td><code>GET /api/backlog</code></td><td>none</td><td>backlog_items.json, purchase_orders.json</td></tr>
+    <tr><td><code>GET /api/spending/*</code></td><td>none</td><td>spending.json, transactions.json</td></tr>
+    <tr><td><code>GET /api/reports/quarterly</code>, <code>/monthly-trends</code></td><td>none</td><td>orders.json (aggregated)</td></tr>
+  </tbody>
+</table>
+
+<h2>Observations</h2>
+<div class="note">
+  <strong>Client and server are out of step.</strong> <code>client/src/api.js</code> calls <code>/tasks</code>
+  (GET, POST, PATCH, DELETE) and <code>/purchase-orders</code> (POST, GET), but <code>server/main.py</code>
+  defines no such routes, so those calls would return 404. The backend has <code>PurchaseOrder</code> models and loads
+  <code>purchase_orders.json</code>, but only uses them to set <code>has_purchase_order</code> on backlog items.
+  Also, <code>views/Backlog.vue</code> has no route registered in <code>main.js</code>.
+</div>
+<div class="grid g2" style="margin-top:16px">
+  <div class="card">
+    <h3>Design choices</h3>
+    <ul>
+      <li>All business logic sits in a single backend file.</li>
+      <li>Shared filter state uses module-level refs rather than a store library.</li>
+      <li>Language and currency switch together (en / USD, ja / JPY).</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Demo-only limits</h3>
+    <ul>
+      <li>CORS allows all origins; there is no authentication.</li>
+      <li>Backend URL is hard-coded in the client.</li>
+      <li>Quarter mapping covers 2025 only.</li>
+    </ul>
+  </div>
+</div>
+
+</main>
+</body>
+</html>
