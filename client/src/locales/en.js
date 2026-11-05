@@ -6,6 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -110,6 +111,13 @@ export default {
     totalRevenue: 'Total Revenue',
     avgOrderValue: 'Avg Order Value',
     onTimeDelivery: 'On-Time Delivery',
+    submittedOrders: 'Submitted Orders',
+    noSubmittedOrders: 'No restocking orders have been submitted yet',
+    submittedOrdersError: 'Failed to load submitted orders',
+    leadTime: 'Lead Time',
+    leadTimeDays: '{count} days',
+    totalCost: 'Total Cost',
+    submittedDate: 'Submitted',
     itemsCount: '{count} items',
     quantity: 'Qty',
     table: {
@@ -126,6 +134,37 @@ export default {
       status: 'Status',
       expectedDelivery: 'Expected Delivery',
       actualDelivery: 'Actual Delivery'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Plan a restocking order from forecasted demand within a budget',
+    budget: 'Budget',
+    totalSpent: 'Total Spent',
+    budgetRemaining: 'Budget Remaining',
+    orderLeadTime: 'Order Lead Time',
+    days: '{count} days',
+    recommended: 'Recommended Items',
+    placeOrder: 'Place Order',
+    placing: 'Placing...',
+    empty: 'The current budget is too low to restock any items. Increase the budget to see recommendations.',
+    loadError: 'Failed to load demand forecasts',
+    submitError: 'Unable to place the order',
+    submitFailed: 'Order failed',
+    confirmationTitle: 'Order placed successfully',
+    orderNumber: 'Order Number',
+    expectedDelivery: 'Expected Delivery',
+    viewOrders: 'View in Orders',
+    table: {
+      sku: 'SKU',
+      name: 'Item Name',
+      trend: 'Trend',
+      quantity: 'Quantity',
+      unitCost: 'Unit Cost',
+      lineCost: 'Line Cost',
+      leadTime: 'Lead Time'
     }
   },
 
